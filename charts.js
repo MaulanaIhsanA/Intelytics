@@ -4,9 +4,9 @@
    works fully offline / with no CDN access.
    ============================================================ */
 (function(){
-  const GRID = '#EEEBE2';
-  const TICK = '#9296A0';
-  const LEGEND_TXT = '#5C6270';
+  const GRID = '#E4DFD1';
+  const TICK = '#5C616C';
+  const LEGEND_TXT = '#33373F';
   const FONT = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
   let tooltipEl = null;
@@ -199,7 +199,7 @@
       if (xr.min < 0 && xr.max > 0){ const x0 = xAt(0); ctx.beginPath(); ctx.moveTo(x0,pad.t); ctx.lineTo(x0,pad.t+plotH); ctx.stroke(); }
       if (yr.min < 0 && yr.max > 0){ const y0 = yAt(0); ctx.beginPath(); ctx.moveTo(pad.l,y0); ctx.lineTo(w-pad.r,y0); ctx.stroke(); }
 
-      ctx.fillStyle = opts.color || '#AD8A42';
+      ctx.fillStyle = opts.color || '#A87A1E';
       opts.points.forEach(p => {
         ctx.beginPath(); ctx.arc(xAt(p.x), yAt(p.y), 3, 0, Math.PI*2); ctx.globalAlpha = 0.6; ctx.fill(); ctx.globalAlpha = 1;
       });

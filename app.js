@@ -39,7 +39,7 @@ function presetToRange(mode){
    ============================================================ */
 const charts = {};
 function killChart(id){ if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
-const GOLD = '#AD8A42', NAVY = '#151D2B', GREEN = '#2E7D5B', RED = '#B8483A';
+const GOLD = '#A87A1E', NAVY = '#10161F', GREEN = '#1F6B49', RED = '#A83A2D';
 const xTick = d => d.toLocaleDateString('id-ID', {day:'2-digit', month:'short'});
 const xTooltip = d => fmtDateLong(d);
 
