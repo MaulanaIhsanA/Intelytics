@@ -1,21 +1,21 @@
 :root{
-  --bg:#FAF9F5;
-  --bg-alt:#F0EDE4;
+  --bg:#F1F2EB;
+  --bg-alt:#D8DAD3;
   --surface:#FFFFFF;
-  --ink:#12151B;
-  --ink-soft:#3D424C;
-  --ink-faint:#686E7A;
-  --gold:#A87A1E;
-  --gold-deep:#7C5A15;
-  --gold-soft:#E7D9B5;
-  --gold-mist:#F4EDDC;
-  --navy:#10161F;
-  --green:#1F6B49;
-  --green-soft:#E1F0E8;
-  --red:#A83A2D;
-  --red-soft:#F6E5E2;
-  --border:#DBD5C6;
-  --border-soft:#EAE6DA;
+  --ink:#2A2C27;
+  --ink-soft:#4A4A48;
+  --ink-faint:#6E6F69;
+  --gold:#566246;
+  --gold-deep:#3E4A32;
+  --gold-soft:#A4C2A5;
+  --gold-mist:#EEF3EC;
+  --navy:#23251F;
+  --green:#3F6B45;
+  --green-soft:#E4EEE4;
+  --red:#9C3B41;
+  --red-soft:#F5E6E5;
+  --border:#DAD7C9;
+  --border-soft:#EAE7DC;
   --shadow-1:0 1px 2px rgba(24,31,42,0.04), 0 1px 1px rgba(24,31,42,0.03);
   --shadow-2:0 12px 32px -12px rgba(24,31,42,0.16);
   --radius:14px;
@@ -385,3 +385,19 @@ tbody tr:hover{background:var(--gold-mist);}
 
 /* canvas sizing for MiniChart (charts.js) */
 .chart-box canvas, .chart-box.sm canvas { width:100%; height:100%; display:block; }
+
+.tip-icon{
+  display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px;
+  border-radius:50%; border:1px solid var(--ink-faint); color:var(--ink-faint); font-size:9.5px;
+  font-style:italic; font-weight:700; margin-left:5px; cursor:help; vertical-align:middle;
+  font-family:Georgia,serif; flex-shrink:0;
+}
+.tip-icon:hover{ border-color:var(--gold); color:var(--gold); background:var(--gold-mist); }
+.glossary-tip{
+  position:fixed; z-index:9997; pointer-events:none; background:var(--navy); color:#fff;
+  padding:9px 12px; border-radius:8px; font-size:12px; line-height:1.55; max-width:240px;
+  opacity:0; transition:opacity .12s ease; box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+.card-label{ gap:4px; }
+.pill[data-tip]{ cursor:help; }
+.stat-cell .sl{ display:flex; align-items:center; }

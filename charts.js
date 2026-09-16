@@ -4,9 +4,9 @@
    works fully offline / with no CDN access.
    ============================================================ */
 (function(){
-  const GRID = '#E4DFD1';
-  const TICK = '#5C616C';
-  const LEGEND_TXT = '#33373F';
+  const GRID = '#EAE7DC';
+  const TICK = '#6E6F69';
+  const LEGEND_TXT = '#4A4A48';
   const FONT = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
   let tooltipEl = null;
@@ -117,7 +117,7 @@
       if (hoverIdx !== null && hoverIdx >= 0 && hoverIdx < n){
         const x = xAt(hoverIdx);
         ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t+plotH);
-        ctx.strokeStyle = '#D8D3C4'; ctx.lineWidth = 1; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = '#C7C3B4'; ctx.lineWidth = 1; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
         opts.datasets.forEach(ds => {
           const y = yAt(ds.data[hoverIdx]);
           ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI*2);
@@ -195,11 +195,11 @@
         ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(xv.toFixed(1), x, h-pad.b+8);
       }
       // zero axes
-      ctx.strokeStyle = '#D8D3C4';
+      ctx.strokeStyle = '#C7C3B4';
       if (xr.min < 0 && xr.max > 0){ const x0 = xAt(0); ctx.beginPath(); ctx.moveTo(x0,pad.t); ctx.lineTo(x0,pad.t+plotH); ctx.stroke(); }
       if (yr.min < 0 && yr.max > 0){ const y0 = yAt(0); ctx.beginPath(); ctx.moveTo(pad.l,y0); ctx.lineTo(w-pad.r,y0); ctx.stroke(); }
 
-      ctx.fillStyle = opts.color || '#A87A1E';
+      ctx.fillStyle = opts.color || '#FF8C42';
       opts.points.forEach(p => {
         ctx.beginPath(); ctx.arc(xAt(p.x), yAt(p.y), 3, 0, Math.PI*2); ctx.globalAlpha = 0.6; ctx.fill(); ctx.globalAlpha = 1;
       });

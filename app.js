@@ -5,6 +5,7 @@ const state = {
   rangeMode: '1Y',
   rangeFrom: null, rangeTo: null,
   marketAsset: 'gold',
+  cumAsset: 'gold',
   volWindow: 7,
   histAsset: 'gold', histFrom: null, histTo: null, histFreq: 'daily',
   histSearch: '', histSortCol: 'date', histSortDir: 'desc', histPage: 1, histPageSize: 15
@@ -39,7 +40,7 @@ function presetToRange(mode){
    ============================================================ */
 const charts = {};
 function killChart(id){ if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
-const GOLD = '#A87A1E', NAVY = '#10161F', GREEN = '#1F6B49', RED = '#A83A2D';
+const GOLD = '#FF8C42', BLUE = '#6699CC', GREEN = '#3F6B45', RED = '#9C3B41';
 const xTick = d => d.toLocaleDateString('id-ID', {day:'2-digit', month:'short'});
 const xTooltip = d => fmtDateLong(d);
 
@@ -55,11 +56,12 @@ function sparkPath(vals, w=88, h=32){
     return `${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(' ');
 }
-function kpiCard({label, value, changePct, spark, up, foot}){
+function kpiCard({label, value, changePct, spark, up, foot, accent}){
   const dir = up ? 'up' : 'down';
   const arrow = up ? '▲' : '▼';
   const color = up ? GREEN : RED;
-  return `<div class="card card-hover">
+  const topBorder = accent ? `border-top:3px solid ${accent};` : '';
+  return `<div class="card card-hover" style="${topBorder}">
     <div class="card-label">${label}</div>
     <div class="kpi-value num">${value}</div>
     <div class="kpi-sub">
@@ -82,16 +84,16 @@ function renderKPIs(){
 
   const html = [
     kpiCard({label:'ANTAM GOLD · 1 GRAM', value: fmtIDR(LAST.gold), changePct: fmtPct(goldPct), up: goldChg>=0,
-      spark: spark30.map(d=>d.gold), foot:'Perubahan harian'}),
+      spark: spark30.map(d=>d.gold), foot:'Perubahan harian', accent: GOLD}),
     kpiCard({label:'USD / IDR', value: 'Rp'+fmtNum(LAST.usd), changePct: fmtPct(usdPct), up: usdChg>=0,
-      spark: spark30.map(d=>d.usd), foot:'Perubahan harian'}),
+      spark: spark30.map(d=>d.usd), foot:'Perubahan harian', accent: BLUE}),
     `<div class="card card-hover">
-      <div class="card-label">PERIOD RETURN <span style="font-weight:500;color:var(--ink-faint)">(${state.rangeMode})</span></div>
+      <div class="card-label">PERIOD RETURN <span style="font-weight:500;color:var(--ink-faint)">(${state.rangeMode})</span>${tipIcon('Persentase perubahan harga emas dari awal sampai akhir periode yang kamu pilih di atas.')}</div>
       <div class="kpi-value num" style="color:${statsGold.pctChange>=0?GREEN:RED}">${fmtPct(statsGold.pctChange)}</div>
       <div class="kpi-foot">Emas Antam, periode terpilih</div>
     </div>`,
     `<div class="card card-hover">
-      <div class="card-label">VOLATILITY</div>
+      <div class="card-label">VOLATILITY${tipIcon('Seberapa besar harga emas naik-turun. Makin tinggi angkanya, makin liar pergerakan harganya — bukan berarti buruk, tapi lebih berisiko.')}</div>
       <div class="kpi-value num">${vol.toFixed(2)}%</div>
       <div class="kpi-foot">Tahunan, dari periode terpilih</div>
     </div>`
@@ -105,7 +107,7 @@ function renderOverviewChart(){
     labels: rows.map(r=>r.date),
     datasets:[
       {label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat: v=>v.toFixed(1)},
-      {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: NAVY, dashed:true, tooltipFormat: v=>v.toFixed(1)}
+      {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, dashed:true, tooltipFormat: v=>v.toFixed(1)}
     ],
     xFormat: xTick, xTooltipFormat: xTooltip, yFormat: v => v.toFixed(0)
   });
@@ -154,12 +156,12 @@ function renderMarkets(){
   if (state.marketAsset === 'both'){
     datasets = [
       {label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat:v=>v.toFixed(1)},
-      {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: NAVY, dashed:true, tooltipFormat:v=>v.toFixed(1)}
+      {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, dashed:true, tooltipFormat:v=>v.toFixed(1)}
     ];
   } else if (state.marketAsset === 'gold'){
     datasets = [{label:'ANTAM Gold (Rp/gram)', data: seriesOf(rows,'gold'), color: GOLD, area:true, tooltipFormat: v=>fmtIDR(v)}];
   } else {
-    datasets = [{label:'USD/IDR (Rp)', data: seriesOf(rows,'usd'), color: NAVY, area:true, tooltipFormat: v=>'Rp'+fmtNum(v)}];
+    datasets = [{label:'USD/IDR (Rp)', data: seriesOf(rows,'usd'), color: BLUE, area:true, tooltipFormat: v=>'Rp'+fmtNum(v)}];
   }
   charts.markets = MiniChart.line(document.getElementById('marketsChart'), {
     labels: rows.map(r=>r.date), datasets,
@@ -279,7 +281,7 @@ function exportCSV(){
   const blob = new Blob([head+body], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = `intelytics-${state.histAsset}-${state.histFreq}.csv`;
+  a.href = url; a.download = `marktl-${state.histAsset}-${state.histFreq}.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
@@ -287,7 +289,8 @@ function exportCSV(){
 /* ============================================================
    9. RENDER: ANALYTICS
    ============================================================ */
-function statCell(label, value){ return `<div class="stat-cell"><div class="sl">${label}</div><div class="sv num">${value}</div></div>`; }
+function tipIcon(text){ return `<span class="tip-icon" data-tip="${text}">i</span>`; }
+function statCell(label, value, tip){ return `<div class="stat-cell"><div class="sl">${label}${tip?tipIcon(tip):''}</div><div class="sv num">${value}</div></div>`; }
 function renderAnalytics(){
   const rows = filterRange(state.rangeFrom, state.rangeTo);
   const s = computeStats(rows, 'gold');
@@ -295,32 +298,20 @@ function renderAnalytics(){
     statCell('Initial Price', fmtIDR(s.first)),
     statCell('Current Price', fmtIDR(s.last)),
     statCell('Absolute Change', (s.change>=0?'+':'') + fmtIDR(s.change)),
-    statCell('Percentage Return', fmtPct(s.pctChange)),
+    statCell('Percentage Return', fmtPct(s.pctChange), 'Persentase perubahan harga dari awal ke akhir periode yang dipilih.'),
     statCell('Average Price', fmtIDR(s.avg)),
     statCell('Median Price', fmtIDR(s.median)),
     statCell('Highest Price', fmtIDR(s.max)),
     statCell('Lowest Price', fmtIDR(s.min)),
-    statCell('CAGR', fmtPct(s.cagr)),
-    statCell('Maximum Drawdown', fmtPct(s.maxDrawdown)),
-    statCell('Volatility (annualized)', s.volatility.toFixed(2)+'%'),
-    statCell('Std. Deviation', fmtIDR(s.stdDev))
+    statCell('CAGR', fmtPct(s.cagr), 'Compound Annual Growth Rate — rata-rata pertumbuhan per tahun jika dihitung majemuk, bukan cuma dibagi rata.'),
+    statCell('Maximum Drawdown', fmtPct(s.maxDrawdown), 'Penurunan terbesar dari titik tertinggi ke titik terendah sesudahnya, dalam periode ini.'),
+    statCell('Volatility (annualized)', s.volatility.toFixed(2)+'%', 'Seberapa besar harga naik-turun setiap hari. Makin tinggi angkanya, makin liar pergerakan harganya.'),
+    statCell('Std. Deviation', fmtIDR(s.stdDev), 'Ukuran sebaran harga dari rata-ratanya, dalam Rupiah. Makin besar, makin jauh harga menyimpang dari rata-rata.')
   ].join('');
 
-  killChart('cum');
-  charts.cum = MiniChart.line(document.getElementById('cumChart'), {
-    labels: rows.map(r=>r.date),
-    datasets:[
-      {label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat: v=>v.toFixed(1)},
-      {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: NAVY, dashed:true, tooltipFormat: v=>v.toFixed(1)}
-    ],
-    xFormat: xTick, xTooltipFormat: xTooltip, yFormat: v => v.toFixed(0)
-  });
-  const gS = computeStats(rows,'gold'), uS = computeStats(rows,'usd');
-  const goldIdx = 100 * (gS.last/gS.first), usdIdx = 100 * (uS.last/uS.first);
-  const winner = goldIdx >= usdIdx ? 'ANTAM Gold' : 'USD/IDR';
-  document.getElementById('cumInsight').textContent =
-    `${winner} mengungguli sepanjang periode terpilih — indeks akhir ANTAM Gold ${goldIdx.toFixed(1)} vs USD/IDR ${usdIdx.toFixed(1)} (basis 100 di awal periode).`;
+  renderCumChart(rows);
 
+  const gS = computeStats(rows,'gold'), uS = computeStats(rows,'usd');
   const dd = drawdownSeries(rows, 'gold');
   killChart('dd');
   charts.dd = MiniChart.line(document.getElementById('ddChart'), {
@@ -335,6 +326,35 @@ function renderAnalytics(){
   renderVolatility(rows);
   renderCorrelation(rows);
   renderDeepInsights(rows, gS, uS);
+}
+function renderCumChart(rows){
+  killChart('cum');
+  const asset = state.cumAsset || 'gold';
+  let datasets;
+  if (asset === 'both'){
+    datasets = [
+      {label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat: v=>v.toFixed(1)},
+      {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, dashed:true, tooltipFormat: v=>v.toFixed(1)}
+    ];
+  } else if (asset === 'usd'){
+    datasets = [{label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, area:true, tooltipFormat: v=>v.toFixed(1)}];
+  } else {
+    datasets = [{label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat: v=>v.toFixed(1)}];
+  }
+  charts.cum = MiniChart.line(document.getElementById('cumChart'), {
+    labels: rows.map(r=>r.date), datasets, xFormat: xTick, xTooltipFormat: xTooltip, yFormat: v => v.toFixed(0)
+  });
+  const gS = computeStats(rows,'gold'), uS = computeStats(rows,'usd');
+  const goldIdx = 100 * (gS.last/gS.first), usdIdx = 100 * (uS.last/uS.first);
+  const insightEl = document.getElementById('cumInsight');
+  if (asset === 'both'){
+    const winner = goldIdx >= usdIdx ? 'ANTAM Gold' : 'USD/IDR';
+    insightEl.textContent = `${winner} mengungguli sepanjang periode terpilih — indeks akhir ANTAM Gold ${goldIdx.toFixed(1)} vs USD/IDR ${usdIdx.toFixed(1)} (basis 100 di awal periode, artinya nilai 100 = harga saat mulai periode).`;
+  } else if (asset === 'usd'){
+    insightEl.textContent = `Indeks USD/IDR bergerak dari 100 menjadi ${usdIdx.toFixed(1)} sepanjang periode terpilih (${fmtPct(uS.pctChange)}). Basis 100 = harga saat awal periode.`;
+  } else {
+    insightEl.textContent = `Indeks ANTAM Gold bergerak dari 100 menjadi ${goldIdx.toFixed(1)} sepanjang periode terpilih (${fmtPct(gS.pctChange)}). Basis 100 = harga saat awal periode.`;
+  }
 }
 function renderVolatility(rows){
   const vol = rollingVolatility(rows, 'gold', state.volWindow);
@@ -496,6 +516,42 @@ if (window.IntersectionObserver){
 }
 
 /* ============================================================
+   11b. GLOSSARY TOOLTIPS (hover explanations for jargon terms)
+   ============================================================ */
+(function(){
+  let tip;
+  function getTip(){
+    if (tip) return tip;
+    tip = document.createElement('div');
+    tip.className = 'glossary-tip';
+    document.body.appendChild(tip);
+    return tip;
+  }
+  function position(e, t){
+    let left = e.clientX + 14, top = e.clientY + 16;
+    if (left + 250 > window.innerWidth) left = e.clientX - 250;
+    if (top + 90 > window.innerHeight) top = e.clientY - 90;
+    t.style.left = left + 'px'; t.style.top = top + 'px';
+  }
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest('[data-tip]');
+    if (!el) return;
+    const t = getTip();
+    t.textContent = el.dataset.tip;
+    t.style.opacity = '1';
+    position(e, t);
+  });
+  document.addEventListener('mousemove', e => {
+    if (!tip || tip.style.opacity !== '1') return;
+    if (!e.target.closest('[data-tip]')) { tip.style.opacity = '0'; return; }
+    position(e, tip);
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest('[data-tip]') && tip) tip.style.opacity = '0';
+  });
+})();
+
+/* ============================================================
    12. TOOLBAR RANGE CONTROLS
    ============================================================ */
 document.querySelectorAll('#globalRange .chip[data-range]').forEach(btn => {
@@ -549,6 +605,14 @@ document.querySelectorAll('#marketAssetSeg button').forEach(btn => {
     btn.classList.add('active');
     state.marketAsset = btn.dataset.asset;
     renderMarkets();
+  });
+});
+document.querySelectorAll('#cumAssetSeg button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#cumAssetSeg button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.cumAsset = btn.dataset.asset;
+    renderCumChart(filterRange(state.rangeFrom, state.rangeTo));
   });
 });
 document.querySelectorAll('#volSeg button').forEach(btn => {
@@ -629,7 +693,7 @@ function initPreviewChart(){
     labels: rows.map(r=>r.date),
     datasets:[
       {label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat: v=>v.toFixed(1)},
-      {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: NAVY, dashed:true, tooltipFormat: v=>v.toFixed(1)}
+      {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, dashed:true, tooltipFormat: v=>v.toFixed(1)}
     ],
     xFormat: xTick, xTooltipFormat: xTooltip, yFormat: v => v.toFixed(0)
   });
