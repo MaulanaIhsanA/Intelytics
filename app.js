@@ -5,6 +5,7 @@ const state = {
   rangeMode: '1Y',
   rangeFrom: null, rangeTo: null,
   marketAsset: 'gold',
+  overviewAsset: 'gold',
   cumAsset: 'gold',
   volWindow: 7,
   histAsset: 'gold', histFrom: null, histTo: null, histFreq: 'daily',
@@ -40,7 +41,7 @@ function presetToRange(mode){
    ============================================================ */
 const charts = {};
 function killChart(id){ if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
-const GOLD = '#FF8C42', BLUE = '#6699CC', GREEN = '#3F6B45', RED = '#9C3B41';
+const GOLD = '#C9668F', BLUE = '#5A6FA8', GREEN = '#3F8F73', RED = '#B5524A';
 const xTick = d => d.toLocaleDateString('id-ID', {day:'2-digit', month:'short'});
 const xTooltip = d => fmtDateLong(d);
 
@@ -103,12 +104,20 @@ function renderKPIs(){
 function renderOverviewChart(){
   const rows = filterRange(state.rangeFrom, state.rangeTo);
   killChart('overview');
-  charts.overview = MiniChart.line(document.getElementById('overviewChart'), {
-    labels: rows.map(r=>r.date),
-    datasets:[
+  const asset = state.overviewAsset || 'gold';
+  let datasets;
+  if (asset === 'both'){
+    datasets = [
       {label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat: v=>v.toFixed(1)},
       {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, dashed:true, tooltipFormat: v=>v.toFixed(1)}
-    ],
+    ];
+  } else if (asset === 'usd'){
+    datasets = [{label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, area:true, tooltipFormat: v=>v.toFixed(1)}];
+  } else {
+    datasets = [{label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat: v=>v.toFixed(1)}];
+  }
+  charts.overview = MiniChart.line(document.getElementById('overviewChart'), {
+    labels: rows.map(r=>r.date), datasets,
     xFormat: xTick, xTooltipFormat: xTooltip, yFormat: v => v.toFixed(0)
   });
 }
@@ -599,6 +608,14 @@ document.getElementById('resetZoom').addEventListener('click', () => {
 document.getElementById('rangeFrom').value = toDateStr(state.rangeFrom);
 document.getElementById('rangeTo').value = toDateStr(state.rangeTo);
 
+document.querySelectorAll('#overviewAssetSeg button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#overviewAssetSeg button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.overviewAsset = btn.dataset.asset;
+    renderOverviewChart();
+  });
+});
 document.querySelectorAll('#marketAssetSeg button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('#marketAssetSeg button').forEach(b => b.classList.remove('active'));
