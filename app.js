@@ -112,14 +112,17 @@ function renderOverviewChart(){
       {label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, dashed:true, tooltipFormat: v=>v.toFixed(1)}
     ];
   } else if (asset === 'usd'){
-    datasets = [{label:'USD/IDR', data: normalize(seriesOf(rows,'usd')), color: BLUE, area:true, tooltipFormat: v=>v.toFixed(1)}];
+    datasets = [{label:'USD/IDR', data: seriesOf(rows,'usd'), color: BLUE, area:true, tooltipFormat: v=>'Rp'+fmtNum(v)}];
   } else {
-    datasets = [{label:'ANTAM Gold', data: normalize(seriesOf(rows,'gold')), color: GOLD, area:true, tooltipFormat: v=>v.toFixed(1)}];
+    datasets = [{label:'ANTAM Gold', data: seriesOf(rows,'gold'), color: GOLD, area:true, tooltipFormat: v=>fmtIDR(v)}];
   }
   charts.overview = MiniChart.line(document.getElementById('overviewChart'), {
     labels: rows.map(r=>r.date), datasets,
-    xFormat: xTick, xTooltipFormat: xTooltip, yFormat: v => v.toFixed(0)
+    xFormat: xTick, xTooltipFormat: xTooltip,
+    yFormat: asset === 'both' ? (v => v.toFixed(0)) : (v => v >= 1000 ? (v/1000).toFixed(0)+'rb' : v.toFixed(0))
   });
+  const capEl = document.querySelector('#overviewChart').closest('.card').querySelector('.section-caption');
+  if (capEl) capEl.textContent = asset === 'both' ? 'Ternormalisasi ke 100 pada awal periode (biar Gold & USD/IDR bisa dibandingkan)' : 'Harga aktual (Rupiah), periode terpilih';
 }
 function renderOverviewTable(){
   const rows = filterRange(state.rangeFrom, state.rangeTo).slice(-10).reverse();
